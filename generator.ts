@@ -1,5 +1,7 @@
 import * as fdIr from "./FD-IR";
 import GlobalContext from './GlobalContext';
+import { FdIrClass } from './FdIrClass';
+
 
 
 // First, create a global context. This could be as simple as an object literal,
@@ -9,15 +11,17 @@ import GlobalContext from './GlobalContext';
 
 let ctx = new GlobalContext();
 
-let id = 0; // or whatever initial value you want
-let name = 'someName'; // replace with actual value
-let value = 'someValue'; // replace with actual value
+ let id = 0; // or whatever initial value you want
+ let name = 'someName'; // replace with actual value
+ let value = 'someValue'; // replace with actual value
 
 
 
 // Instantiate an object for each class in FD-IR
 //// const instances = Object.values(fdIr).map(FdIrClass => new FdIrClass());
-const instances = Object.values(fdIr).map(FdIrClass => new FdIrClass(id, name, value));  // assuming `id`, `name`, `value` are defined.
+//// const instances = Object.values(fdIr).map(FdIrClass => new FdIrClass(id, name, value));  // assuming `id`, `name`, `value` are defined.
+const instances = Object.values(fdIr).map(FdIrClass => new FdIrClass(id, name, value));
+
 
 instances.forEach(instance => instance.generate(ctx));
 
