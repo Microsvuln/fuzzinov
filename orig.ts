@@ -1,4 +1,4 @@
-import { NavigatorGPU,GPUAdapter,GPUQueue ,GPUSupportedLimits,GPUTextureDescriptor,GPUSupportedFeatures,GPURequestAdapterOptions, GPUBufferUsage, GPUBufferUsageFlags, GPUBufferDescriptor, GPU, GPUDevice, GPUBuffer } from './gputypes';
+import { NavigatorGPU,GPUAdapter,GPUQueue ,GPUSupportedLimits,GPUTextureDescriptor,GPUSupportedFeatures,GPURequestAdapterOptions, GPUBufferUsageFlags, GPUBufferDescriptor, GPU, GPUDevice, GPUBuffer } from './gputypes';
 import * as fs from 'fs';
 
 
@@ -14,6 +14,19 @@ abstract class Value {
     abstract generate(ctx: GPUDevice): void;
     abstract mutate(ctx: GPUDevice): void;
     abstract lower(): string;
+}
+
+class GPUBufferUsage {
+    static readonly MAP_READ: number = 0x0001;
+    static readonly MAP_WRITE: number = 0x0002;
+    static readonly COPY_SRC: number = 0x0004;
+    static readonly COPY_DST: number = 0x0008;
+    static readonly INDEX: number = 0x0010;
+    static readonly VERTEX: number = 0x0020;
+    static readonly UNIFORM: number = 0x0040;
+    static readonly STORAGE: number = 0x0080;
+    static readonly INDIRECT: number = 0x0100;
+    static readonly QUERY_RESOLVE: number = 0x0200;
 }
 
 class RequestAdapterValue extends Value {
