@@ -1,0 +1,52 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var ts_morph_1 = require("ts-morph");
+var project = new ts_morph_1.Project();
+var sourceFile = project.addSourceFileAtPath("./file.ts");
+sourceFile.forEachDescendant(function (node) {
+    if (node.getKind() === ts_morph_1.SyntaxKind.CallExpression) {
+        var callExpr = node.asKind(ts_morph_1.SyntaxKind.CallExpression);
+        var expression = callExpr.getExpression();
+        console.log("Examining expression:", expression.getText()); // Debug line
+        if (expression.getText().endsWith(".createBuffer")) {
+            console.log("Found createBuffer call"); // Debug line
+            var args = callExpr.getArguments();
+            if (args.length > 0 && args[0].getKind() === ts_morph_1.SyntaxKind.ObjectLiteralExpression) {
+                console.log("Found object literal argument"); // Debug line
+                var objectLiteral = args[0].asKind(ts_morph_1.SyntaxKind.ObjectLiteralExpression);
+                objectLiteral.getProperties().forEach(function (property) {
+                    if (property.getKind() === ts_morph_1.SyntaxKind.PropertyAssignment) {
+                        var propertyAssignment = property.asKind(ts_morph_1.SyntaxKind.PropertyAssignment);
+                        /// const propertyName = propertyAssignment.getName().trim();
+                        var propertyName = propertyAssignment.getName().trim().replace(/"/g, "");
+                        console.log("Found property:", propertyName); // Debug line
+                        console.log("Type : ", typeof (propertyName)); // Debug line
+                        console.log("ASCII values:", propertyName.split('').map(function (c) { return c.charCodeAt(0); })); // Debug line for ASCII values
+                        console.log("Comparing to 'size':", propertyName === "size"); // Debug line for comparison
+                        if (propertyName === "size") {
+                            console.log("Changing size property");
+                            var oldValue = propertyAssignment.getInitializer().getText();
+                            var newValue = +oldValue + 1;
+                            console.log("Old value:", oldValue);
+                            propertyAssignment.setInitializer(newValue.toString());
+                        }
+                    }
+                });
+            }
+            else {
+                console.log("No object literal argument found"); // Debug line
+            }
+        }
+        else {
+            console.log("Not a createBuffer call"); // Debug line
+        }
+    }
+});
+var newContent = sourceFile.getFullText(); // Get the modified content
+// Print the modified content for verification
+console.log("Modified content:");
+console.log(newContent);
+// Create a new file with the modified content
+var newSourceFile = project.createSourceFile("./filexx.ts", newContent);
+// Save the new file
+newSourceFile.saveSync();

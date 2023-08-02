@@ -1,10 +1,18 @@
 {
   "compilerOptions": {
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "*": [
+        "node_modules/*"
+      ]
+    },
     "target": "es2017",
-    "module": "esnext",
+    "module": "commonjs", // make sure you're targeting CommonJS modules for Node.js
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": true
+    "strict": true,
+    "types": ["node"] // this line tells TypeScript to include the Node.js types
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]

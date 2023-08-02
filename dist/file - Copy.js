@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 (async () => {
     let device0;
     let device1;
@@ -26,4 +28,3 @@
         const buffer4 = device0.createBuffer({ "mappedAtCreation": true, "size": 685, "usage": 1 });
     }
 })();
-export {};
