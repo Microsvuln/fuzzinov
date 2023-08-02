@@ -56,10 +56,13 @@ var GlobalContext = /** @class */ (function () {
 }());
 var LocalContext = /** @class */ (function () {
     function LocalContext() {
-        this.device = null;
+        this.device = null; // Define as an array of strings or null
     }
     LocalContext.prototype.setDevice = function (device) {
-        this.device = device;
+        if (this.device === null) {
+            this.device = [];
+        }
+        this.device.push(device); // Add device to the array
     };
     return LocalContext;
 }());
@@ -143,8 +146,24 @@ var ReturnValue = /** @class */ (function (_super) {
 // Define GPUBufferDescriptorValue class
 var GPUBufferDescriptorValue = /** @class */ (function (_super) {
     __extends(GPUBufferDescriptorValue, _super);
-    function GPUBufferDescriptorValue(size, usage) {
+    function GPUBufferDescriptorValue() {
         var _this = _super.call(this) || this;
+        // Generate a random size (e.g., between 1 and 1000)
+        var size = Math.floor(Math.random() * 1000) + 1;
+        // Generate a random usage flag by selecting a random combination of the available flags
+        var usageFlags = [
+            GPUBufferUsage.MAP_READ,
+            GPUBufferUsage.MAP_WRITE,
+            GPUBufferUsage.COPY_SRC,
+            GPUBufferUsage.COPY_DST,
+            GPUBufferUsage.INDEX,
+            GPUBufferUsage.VERTEX,
+            GPUBufferUsage.UNIFORM,
+            GPUBufferUsage.STORAGE,
+            GPUBufferUsage.INDIRECT,
+            GPUBufferUsage.QUERY_RESOLVE,
+        ];
+        var usage = usageFlags[Math.floor(Math.random() * usageFlags.length)];
         _this.descriptor = {
             size: size,
             usage: usage,
@@ -152,11 +171,18 @@ var GPUBufferDescriptorValue = /** @class */ (function (_super) {
         return _this;
     }
     GPUBufferDescriptorValue.prototype.generate = function (globalCtx, localCtx) {
-        // Assuming you have a method to get the current GPUDevice from the local context
-        var device = localCtx.device;
-        // Assuming you have a method to store generated code snippets in the global context
-        var codeSnippet = "const buffer = device.createBuffer(".concat(JSON.stringify(this.descriptor), ");\nconsole.log(`Created buffer: ${buffer}`);");
-        globalCtx.addGeneratedCode(codeSnippet);
+        // Check if localCtx.device is an array and not null
+        if (Array.isArray(localCtx.device) && localCtx.device.length > 0) {
+            var randomIndex = Math.floor(Math.random() * localCtx.device.length);
+            var deviceVar = localCtx.device[randomIndex];
+            // Generate the code snippet
+            var codeSnippet = "const buffer = ".concat(deviceVar, ".createBuffer(").concat(JSON.stringify(this.descriptor), ");");
+            globalCtx.addGeneratedCode(codeSnippet);
+            console.log(codeSnippet);
+        }
+        else {
+            throw new Error('No devices found in the local context.');
+        }
     };
     GPUBufferDescriptorValue.prototype.mutate = function (ctx) {
         // Mutation logic for GPUBufferDescriptorValue
@@ -217,29 +243,25 @@ var GPUDeviceValue = /** @class */ (function (_super) {
 }(Value));
 var globalCtx = new GlobalContext();
 var localCtx = new LocalContext();
-// Create a RequestAdapterValue instance
-var requestAdapterValue = new RequestAdapterValue();
-var requestAdapterValue2 = new RequestAdapterValue();
-var requestAdapterValue3 = new RequestAdapterValue();
-var requestAdapterValue4 = new RequestAdapterValue();
-var requestAdapterValue5 = new RequestAdapterValue();
-var requestAdapterValue6 = new RequestAdapterValue();
-// Generate code and execute it
-var adapterCode = requestAdapterValue.generate(globalCtx, localCtx);
-//////console.log('Code generation seems to be working : ', adapterCode);
-/////console.log(adapterCode); // This should print the generated code
-/////console.log('Hello Arash');
-var adapterCode2 = requestAdapterValue2.generate(globalCtx, localCtx);
-var adapterCode3 = requestAdapterValue2.generate(globalCtx, localCtx);
-var adapterCode4 = requestAdapterValue2.generate(globalCtx, localCtx);
-var adapterCode5 = requestAdapterValue2.generate(globalCtx, localCtx);
-var adapterCode6 = requestAdapterValue2.generate(globalCtx, localCtx);
-var newDevice = new GPUDeviceValue();
-var deviceCode = newDevice.generate(globalCtx, localCtx);
-var newDevice1 = new GPUDeviceValue();
-var deviceCode1 = newDevice1.generate(globalCtx, localCtx);
-var newDevice2 = new GPUDeviceValue();
-var deviceCode2 = newDevice2.generate(globalCtx, localCtx);
+for (var i = 0; i < 10; i++) {
+    // Create a RequestAdapterValue instance to generate an adapter
+    var requestAdapterValue = new RequestAdapterValue();
+    requestAdapterValue.generate(globalCtx, localCtx);
+}
+for (var i = 0; i < 20; i++) {
+    // Create a RequestAdapterValue instance to generate an adapter
+    var gpuDeviceValue = new GPUDeviceValue();
+    gpuDeviceValue.generate(globalCtx, localCtx);
+}
+for (var i = 0; i < 5; i++) {
+    var requestAdapterValue10 = new RequestAdapterValue();
+    requestAdapterValue10.generate(globalCtx, localCtx);
+    var gpuDeviceValue20 = new GPUDeviceValue();
+    gpuDeviceValue20.generate(globalCtx, localCtx);
+    var gpuBuffers1 = new GPUBufferDescriptorValue();
+    gpuBuffers1.generate(globalCtx, localCtx);
+}
+// Create a GPUDeviceValue instance to generate a device
 // Execute the generated code, assuming you have logic in the generate method to actually request an adapter
 // ...
 // Continue with the rest of your logic
