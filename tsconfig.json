@@ -1,8 +1,11 @@
 {
-    // ...
-    "compilerOptions": {
-		    "moduleResolution": "node",
-
-
-    }
-  }
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "esnext",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
