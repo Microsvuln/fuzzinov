@@ -31,11 +31,11 @@ class GPUBufferUsage {
 
 class GlobalContext {
     // Global variables and methods go here
-    adapters: GPUAdapter[] = [];
+    adapters: string[] = [];
     generatedCodeSnippets: string[] = [];
 
     // Method to add an adapter
-    addAdapter(adapter: GPUAdapter): void {
+    addAdapter(adapter: string): void {
         this.adapters.push(adapter);
     }
 
@@ -52,8 +52,8 @@ class GlobalContext {
 
   
 class LocalContext {
-    device: GPUDevice | null = null;
-    setDevice(device: GPUDevice) {
+    device: string | null = null;
+    setDevice(device: string) {
         this.device = device;
     }
 }
@@ -70,13 +70,14 @@ class RequestAdapterValue extends Value {
         this.id = RequestAdapterValue.idCounter++;
     }
 
-    generate(globalCtx: GlobalContext, localCtx: LocalContext): void {
+    generate(globalCtx: GlobalContext, localCtx: LocalContext): string {
         const code = `const adapter${this.id} = await gpu.requestAdapter(${this.options ? JSON.stringify(this.options) : ''});\n`;
-        // Here you would typically execute this code to get a real GPUAdapter object
-        const adapter = null; // TODO: Replace with actual code to create or retrieve the adapter
+        const adapter = `adapter${this.id}`; 
         globalCtx.addAdapter(adapter);
         console.log(code);
+        return adapter;
     }
+
 
 
     mutate(): string {
@@ -100,11 +101,16 @@ class GPUBufferValue extends Value {
         this.size = size;
     }
 
-    generate(globalCtx: GlobalContext, localCtx: LocalContext) {
-        this.buffer = localCtx.device.createBuffer({
-            size: this.size,
+    generate(globalCtx: GlobalContext, localCtx: LocalContext): string {
+        const deviceVar = localCtx.device; // assuming this is a string representing the variable name
+        if (deviceVar === null) {
+            throw new Error('Device is not set in local context.');
+        }
+    
+        return `const buffer = ${deviceVar}.createBuffer({
+            size: ${this.size},
             usage: GPUBufferUsage.STORAGE,
-        });
+        });\nconsole.log(\`Created buffer: \${buffer}\`);`;
     }
     
 
@@ -188,7 +194,16 @@ class GPUBufferDescriptorValue extends Value {
     }
 }
 
-
+class SimulatedAdapter {
+    // Properties representing the state of the adapter
+    
+    // Method to simulate requesting a device
+    requestDevice(): string {
+        return 'simulatedDevice';
+    }
+    
+    // Other methods representing what an adapter does
+}
 
 class GPUDeviceValue extends Value {
     // Assuming we have corresponding Value classes for these types
@@ -207,13 +222,16 @@ class GPUDeviceValue extends Value {
         if (globalCtx.adapters.length === 0) {
             throw new Error("No adapters available.");
         }
-        const adapter = globalCtx.adapters[0]; // Example: use the first adapter
+        
+        // Select a random adapter from the available adapters
+        const randomIndex = Math.floor(Math.random() * globalCtx.adapters.length);
+        const adapter = globalCtx.adapters[randomIndex];
+        
+        localCtx.setDevice(`device${this.id}`);
         const code = `const device${this.id} = await ${adapter}.requestDevice();`;
-        // Here you would typically execute this code to get a real GPUDevice object
-        const device = null; // TODO: Replace with actual code to create or retrieve the device
-        localCtx.setDevice(device);
         console.log(code);
     }
+
     // Destroy the device
     destroy(): string {
         return `device${this.id}.destroy();`;
@@ -237,32 +255,56 @@ class GPUDeviceValue extends Value {
         return '';
     }
 }
-async function main() {
+
     const globalCtx = new GlobalContext();
     const localCtx = new LocalContext();
   
     // Create a RequestAdapterValue instance
     const requestAdapterValue = new RequestAdapterValue();
     const requestAdapterValue2 = new RequestAdapterValue();
-  
+    const requestAdapterValue3 = new RequestAdapterValue();
+    const requestAdapterValue4 = new RequestAdapterValue();
+    const requestAdapterValue5 = new RequestAdapterValue();
+    const requestAdapterValue6 = new RequestAdapterValue();
+
+
     // Generate code and execute it
     const adapterCode = requestAdapterValue.generate(globalCtx, localCtx);
-    console.log('Code generation seems to be working : ', adapterCode);
-    console.log(adapterCode); // This should print the generated code
-    console.log('Hello Arash');
+
+
+    //////console.log('Code generation seems to be working : ', adapterCode);
+    /////console.log(adapterCode); // This should print the generated code
+    /////console.log('Hello Arash');
 
     const adapterCode2 = requestAdapterValue2.generate(globalCtx, localCtx);
+    const adapterCode3 = requestAdapterValue2.generate(globalCtx, localCtx);
+    const adapterCode4 = requestAdapterValue2.generate(globalCtx, localCtx);
+    const adapterCode5 = requestAdapterValue2.generate(globalCtx, localCtx);
+    const adapterCode6 = requestAdapterValue2.generate(globalCtx, localCtx);
 
+
+
+    const newDevice = new GPUDeviceValue();
+    const deviceCode = newDevice.generate(globalCtx, localCtx);
+
+    const newDevice1 = new GPUDeviceValue();
+    const deviceCode1 = newDevice1.generate(globalCtx, localCtx);
+
+  
+
+    const newDevice2 = new GPUDeviceValue();
+    const deviceCode2 = newDevice2.generate(globalCtx, localCtx);
+
+  
+
+  
   
     // Execute the generated code, assuming you have logic in the generate method to actually request an adapter
     // ...
   
     // Continue with the rest of your logic
     // ...
-  }
-  main().catch((error) => {
-    console.error(error);
-  });
+
 /*
 const requestAdapterValue = new RequestAdapterValue();
 console.log(requestAdapterValue.generate());
