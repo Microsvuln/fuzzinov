@@ -244,21 +244,21 @@ var GPUDeviceValue = /** @class */ (function (_super) {
 }(Value));
 var globalCtx = new GlobalContext();
 var localCtx = new LocalContext();
-for (var i = 0; i < 10; i++) {
+for (var i = 0; i < 6; i++) {
     // Create a RequestAdapterValue instance to generate an adapter
     var requestAdapterValue = new RequestAdapterValue();
     requestAdapterValue.generate(globalCtx, localCtx);
 }
-for (var i = 0; i < 20; i++) {
+for (var i = 0; i < 10; i++) {
     // Create a RequestAdapterValue instance to generate an adapter
     var gpuDeviceValue = new GPUDeviceValue();
     gpuDeviceValue.generate(globalCtx, localCtx);
 }
 for (var i = 0; i < 5; i++) {
-    var requestAdapterValue10 = new RequestAdapterValue();
-    requestAdapterValue10.generate(globalCtx, localCtx);
-    var gpuDeviceValue20 = new GPUDeviceValue();
-    gpuDeviceValue20.generate(globalCtx, localCtx);
+    //// const requestAdapterValue10 = new RequestAdapterValue();
+    ///// requestAdapterValue10.generate(globalCtx, localCtx);
+    //// const gpuDeviceValue20 = new GPUDeviceValue();
+    ///// gpuDeviceValue20.generate(globalCtx, localCtx);
     var gpuBuffers1 = new GPUBufferDescriptorValue();
     gpuBuffers1.generate(globalCtx, localCtx);
 }

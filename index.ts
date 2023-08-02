@@ -311,10 +311,10 @@ class GPUDeviceValue extends Value {
 
 
     for (let i = 0; i < 5; i++) {
-        const requestAdapterValue10 = new RequestAdapterValue();
-        requestAdapterValue10.generate(globalCtx, localCtx);
-        const gpuDeviceValue20 = new GPUDeviceValue();
-        gpuDeviceValue20.generate(globalCtx, localCtx);
+        //// const requestAdapterValue10 = new RequestAdapterValue();
+        ///// requestAdapterValue10.generate(globalCtx, localCtx);
+        //// const gpuDeviceValue20 = new GPUDeviceValue();
+        ///// gpuDeviceValue20.generate(globalCtx, localCtx);
         const gpuBuffers1 = new GPUBufferDescriptorValue();
         gpuBuffers1.generate(globalCtx, localCtx);
 
