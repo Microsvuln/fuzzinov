@@ -21,7 +21,6 @@ sourceFile.forEachDescendant((node) => {
         objectLiteral.getProperties().forEach((property) => {
           if (property.getKind() === SyntaxKind.PropertyAssignment) {
             const propertyAssignment = property.asKind(SyntaxKind.PropertyAssignment);
-            /// const propertyName = propertyAssignment.getName().trim();
             const propertyName = propertyAssignment.getName().trim().replace(/"/g, "");
             console.log("Found property:", propertyName); // Debug line
             console.log("Type : ", typeof(propertyName)); // Debug line
@@ -31,11 +30,12 @@ sourceFile.forEachDescendant((node) => {
             if (propertyName === "size") {
               console.log("Changing size property");
               const oldValue = propertyAssignment.getInitializer().getText();
-              const newValue = +(oldValue as string) + 1;
+              // Generate a random integer value
+              const newValue = Math.floor(Math.random() * 10000); // Replace 10000 with the desired range
               console.log("Old value:", oldValue);
+              console.log("New random value:", newValue);
               propertyAssignment.setInitializer(newValue.toString());
             }
-            
           }
         });
         
