@@ -165,6 +165,7 @@ var GPUBufferDescriptorValue = /** @class */ (function (_super) {
         ];
         var usage = usageFlags[Math.floor(Math.random() * usageFlags.length)];
         _this.descriptor = {
+            mappedAtCreation: true || false,
             size: size,
             usage: usage,
         };

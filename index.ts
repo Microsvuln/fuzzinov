@@ -190,6 +190,7 @@ class GPUBufferDescriptorValue extends Value {
         const usage = usageFlags[Math.floor(Math.random() * usageFlags.length)];
     
         this.descriptor = {
+            mappedAtCreation: true||false,
             size: size,
             usage: usage,
         };
@@ -291,7 +292,7 @@ class GPUDeviceValue extends Value {
   
 
     
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 6; i++) {
         // Create a RequestAdapterValue instance to generate an adapter
         const requestAdapterValue = new RequestAdapterValue();
         requestAdapterValue.generate(globalCtx, localCtx);
@@ -300,7 +301,7 @@ class GPUDeviceValue extends Value {
     }
     
   
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 10; i++) {
         // Create a RequestAdapterValue instance to generate an adapter
         const gpuDeviceValue = new GPUDeviceValue();
         gpuDeviceValue.generate(globalCtx, localCtx);
