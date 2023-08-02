@@ -215,7 +215,7 @@ class GPUBufferDescriptorValue extends Value {
 
     
 
-    mutate(ctx: GPUDevice): void {
+    mutate(globalCtx: GlobalContext, localCtx: LocalContext): void {
         // Mutation logic for GPUBufferDescriptorValue
     }
 
