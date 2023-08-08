@@ -185,8 +185,9 @@ var GPUBufferDescriptorValue = /** @class */ (function (_super) {
             throw new Error('No devices found in the local context.');
         }
     };
-    GPUBufferDescriptorValue.prototype.mutate = function (ctx) {
+    GPUBufferDescriptorValue.prototype.mutate = function () {
         // Mutation logic for GPUBufferDescriptorValue
+        return '';
     };
     GPUBufferDescriptorValue.prototype.lower = function () {
         // Returns a string representation of a GPUBufferDescriptor
