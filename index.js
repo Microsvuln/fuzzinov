@@ -39,11 +39,23 @@ var GlobalContext = /** @class */ (function () {
     function GlobalContext() {
         // Global variables and methods go here
         this.adapters = [];
+        this.gpuBuffers = [];
+        this.arrayBuffers = [];
         this.generatedCodeSnippets = [];
+        this.UintArrays = [];
     }
     // Method to add an adapter
     GlobalContext.prototype.addAdapter = function (adapter) {
         this.adapters.push(adapter);
+    };
+    GlobalContext.prototype.addUintArray = function (UintArray) {
+        this.UintArrays.push(UintArray);
+    };
+    GlobalContext.prototype.addArrayBuffer = function (arrayBuffer) {
+        this.arrayBuffers.push(arrayBuffer);
+    };
+    GlobalContext.prototype.addGpuBuffer = function (gpuBuffer) {
+        this.gpuBuffers.push(gpuBuffer);
     };
     GlobalContext.prototype.addGeneratedCode = function (snippet) {
         this.generatedCodeSnippets.push(snippet);
@@ -57,12 +69,26 @@ var GlobalContext = /** @class */ (function () {
 var LocalContext = /** @class */ (function () {
     function LocalContext() {
         this.device = null; // Define as an array of strings or null
+        this.gpuBuffer = null;
+        this.arrayBuffer = null;
     }
     LocalContext.prototype.setDevice = function (device) {
         if (this.device === null) {
             this.device = [];
         }
         this.device.push(device); // Add device to the array
+    };
+    LocalContext.prototype.setGpuBuffers = function (gpuBuffer) {
+        if (this.gpuBuffer == null) {
+            this.gpuBuffer = [];
+        }
+        this.gpuBuffer.push(gpuBuffer);
+    };
+    LocalContext.prototype.setArrayBuffers = function (arrayBuffer) {
+        if (this.arrayBuffer == null) {
+            this.arrayBuffer = [];
+        }
+        this.arrayBuffer.push(arrayBuffer);
     };
     return LocalContext;
 }());
@@ -148,6 +174,8 @@ var GPUBufferDescriptorValue = /** @class */ (function (_super) {
     __extends(GPUBufferDescriptorValue, _super);
     function GPUBufferDescriptorValue() {
         var _this = _super.call(this) || this;
+        _this.randVar = Math.floor(Math.random() * 1000) + 1;
+        _this.id = _this.randVar;
         // Generate a random size (e.g., between 1 and 1000)
         var size = Math.floor(Math.random() * 1000) + 1;
         // Generate a random usage flag by selecting a random combination of the available flags
@@ -164,9 +192,18 @@ var GPUBufferDescriptorValue = /** @class */ (function (_super) {
             GPUBufferUsage.QUERY_RESOLVE,
         ];
         var usage = usageFlags[Math.floor(Math.random() * usageFlags.length)];
+        // Ensure MAP_READ and MAP_WRITE conditions
+        if (usage & GPUBufferUsage.MAP_READ) {
+            usage = GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST;
+        }
+        if (usage & GPUBufferUsage.MAP_WRITE) {
+            usage = GPUBufferUsage.MAP_WRITE | GPUBufferUsage.COPY_SRC;
+        }
+        // Randomize mappedAtCreation
+        var mappedAtCreation = Math.random() < 0.5;
         _this.descriptor = {
-            mappedAtCreation: true || false,
-            size: size,
+            mappedAtCreation: mappedAtCreation,
+            size: mappedAtCreation ? size - (size % 4) + 4 : size,
             usage: usage,
         };
         return _this;
@@ -177,7 +214,10 @@ var GPUBufferDescriptorValue = /** @class */ (function (_super) {
             var randomIndex = Math.floor(Math.random() * localCtx.device.length);
             var deviceVar = localCtx.device[randomIndex];
             // Generate the code snippet
-            var codeSnippet = "const buffer = ".concat(deviceVar, ".createBuffer(").concat(JSON.stringify(this.descriptor), ");");
+            var codeSnippet = "const buffer".concat(this.id, " = ").concat(deviceVar, ".createBuffer(").concat(JSON.stringify(this.descriptor), ");");
+            var buffer = "buffer".concat(this.id);
+            globalCtx.addGpuBuffer(buffer);
+            localCtx.setGpuBuffers(buffer);
             globalCtx.addGeneratedCode(codeSnippet);
             console.log(codeSnippet);
         }
@@ -186,8 +226,8 @@ var GPUBufferDescriptorValue = /** @class */ (function (_super) {
         }
     };
     GPUBufferDescriptorValue.prototype.mutate = function () {
-        // Mutation logic for GPUBufferDescriptorValue
         return '';
+        // Mutation logic for GPUBufferDescriptorValue
     };
     GPUBufferDescriptorValue.prototype.lower = function () {
         // Returns a string representation of a GPUBufferDescriptor
@@ -195,6 +235,82 @@ var GPUBufferDescriptorValue = /** @class */ (function (_super) {
     };
     GPUBufferDescriptorValue.idCounter = 0;
     return GPUBufferDescriptorValue;
+}(Value));
+// Define GPUBufferDescriptorValue class
+var GPUBuffeMappedRange = /** @class */ (function (_super) {
+    __extends(GPUBuffeMappedRange, _super);
+    function GPUBuffeMappedRange() {
+        var _this = _super.call(this) || this;
+        _this.randVar = Math.floor(Math.random() * 1000) + 1;
+        _this.id = _this.randVar;
+        // Generate a random size (e.g., between 1 and 1000)
+        var size = Math.floor(Math.random() * 1000) + 1;
+        return _this;
+    }
+    GPUBuffeMappedRange.prototype.generate = function (globalCtx, localCtx) {
+        // Check if localCtx.device is an array and not null
+        if (Array.isArray(localCtx.gpuBuffer) && localCtx.gpuBuffer.length > 0) {
+            var randomIndexGpuBuffers = Math.floor(Math.random() * localCtx.gpuBuffer.length);
+            var bufferVar = localCtx.gpuBuffer[randomIndexGpuBuffers];
+            // Generate the code snippet
+            var codeSnippet = "const arrayBuffer".concat(this.id, " = ").concat(bufferVar, ".getMappedRange();");
+            var arrayBuffer = "arrayBuffer".concat(this.id);
+            //// const code = `const adapter${this.id} = await gpu.requestAdapter(${this.options ? JSON.stringify(this.options) : ''});\n`;
+            globalCtx.addArrayBuffer(arrayBuffer);
+            localCtx.setArrayBuffers(arrayBuffer);
+            globalCtx.addGeneratedCode(codeSnippet);
+            console.log(codeSnippet);
+        }
+        else {
+            throw new Error('No gpuBuffer found in the local context.');
+        }
+    };
+    GPUBuffeMappedRange.prototype.mutate = function () {
+        return '';
+        // Mutation logic for GPUBufferDescriptorValue
+    };
+    GPUBuffeMappedRange.prototype.lower = function () {
+        // Returns a string representation of a GPUBufferDescriptor
+        return JSON.stringify(this.descriptor);
+    };
+    GPUBuffeMappedRange.idCounter = 0;
+    return GPUBuffeMappedRange;
+}(Value));
+var setUintArray = /** @class */ (function (_super) {
+    __extends(setUintArray, _super);
+    function setUintArray() {
+        var _this = _super.call(this) || this;
+        _this.length = [8, 16, 32, 64, 128];
+        _this.randVar = Math.floor(Math.random() * 1000) + 1;
+        _this.id = _this.randVar;
+        return _this;
+    }
+    setUintArray.prototype.generate = function (globalCtx, localCtx) {
+        if (Array.isArray(localCtx.arrayBuffer) && localCtx.arrayBuffer.length > 0) {
+            var randomIndexArrayBuffer = Math.floor(Math.random() * localCtx.arrayBuffer.length);
+            var randomArrayBuffer = localCtx.arrayBuffer[randomIndexArrayBuffer];
+            var codeSnippet = "const UintArray".concat(this.id, "= new Uint8Array(").concat(randomArrayBuffer, ").set([0, 1, 2, 3]);");
+            var uIntArray = "UintArray".concat(this.id);
+            globalCtx.addUintArray(uIntArray);
+            //// const code = `const adapter${this.id} = await gpu.requestAdapter(${this.options ? JSON.stringify(this.options) : ''});\n`;
+            //// globalCtx.addArrayBuffer(arrayBuffer);
+            globalCtx.addGeneratedCode(codeSnippet);
+            console.log(codeSnippet);
+        }
+        else {
+            throw new Error('No arrayBuffer found in the local context.');
+        }
+    };
+    setUintArray.prototype.mutate = function () {
+        return '';
+        // Mutation logic for GPUBufferDescriptorValue
+    };
+    setUintArray.prototype.lower = function () {
+        // Returns a string representation of a GPUBufferDescriptor
+        return '';
+    };
+    setUintArray.idCounter = 0;
+    return setUintArray;
 }(Value));
 var SimulatedAdapter = /** @class */ (function () {
     function SimulatedAdapter() {
@@ -262,6 +378,14 @@ for (var i = 0; i < 5; i++) {
     ///// gpuDeviceValue20.generate(globalCtx, localCtx);
     var gpuBuffers1 = new GPUBufferDescriptorValue();
     gpuBuffers1.generate(globalCtx, localCtx);
+}
+for (var i = 0; i < 3; i++) {
+    var gpuBufferGetMappedrange = new GPUBuffeMappedRange();
+    gpuBufferGetMappedrange.generate(globalCtx, localCtx);
+}
+for (var i = 0; i < 2; i++) {
+    var uintArraySample = new setUintArray();
+    uintArraySample.generate(globalCtx, localCtx);
 }
 // Create a GPUDeviceValue instance to generate a device
 // Execute the generated code, assuming you have logic in the generate method to actually request an adapter
