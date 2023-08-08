@@ -1327,7 +1327,7 @@ interface HTMLCanvasElement {
     type?: GPUSamplerBindingType;
   }
   
-  interface GPUSamplerDescriptor
+  export interface GPUSamplerDescriptor
     extends GPUObjectDescriptorBase {
     /**
      */
@@ -2555,7 +2555,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPUExternalTexture
+  export interface GPUExternalTexture
     extends GPUObjectBase {
     /**
      * Nominal type branding.
@@ -2911,7 +2911,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPUSampler
+  export interface GPUSampler
     extends GPUObjectBase {
     /**
      * Nominal type branding.
@@ -2995,7 +2995,7 @@ interface HTMLCanvasElement {
     prototype: GPUSupportedLimits;
   };
   
-  interface GPUTexture
+  export interface GPUTexture
     extends GPUObjectBase {
     /**
      * Nominal type branding.
