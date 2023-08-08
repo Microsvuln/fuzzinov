@@ -111,7 +111,7 @@ interface HTMLCanvasElement {
     number;
   type GPUSize32Out =
     number;
-  type GPUSize64 =
+  export type GPUSize64 =
     number;
   type GPUSize64Out =
     number;
@@ -186,7 +186,7 @@ interface HTMLCanvasElement {
   
       | "unknown"
       | "destroyed";
-  type GPUErrorFilter =
+  export type GPUErrorFilter =
   
       | "validation"
       | "out-of-memory"
@@ -422,7 +422,7 @@ interface HTMLCanvasElement {
       | "vertex"
       | "instance";
   
-  interface GPUBindGroupDescriptor
+  export interface GPUBindGroupDescriptor
     extends GPUObjectDescriptorBase {
     /**
      * The {@link GPUBindGroupLayout} the entries of this bind group will conform to.
@@ -665,7 +665,7 @@ interface HTMLCanvasElement {
   
   type GPUCommandBufferDescriptor =
     GPUObjectDescriptorBase;
-  type GPUCommandEncoderDescriptor =
+  export type GPUCommandEncoderDescriptor =
     GPUObjectDescriptorBase;
   
   interface GPUComputePassDescriptor
@@ -694,7 +694,7 @@ interface HTMLCanvasElement {
     endOfPassWriteIndex?: GPUSize32;
   }
   
-  interface GPUComputePipelineDescriptor
+  export interface GPUComputePipelineDescriptor
     extends GPUPipelineDescriptorBase {
     /**
      * Describes the compute shader entry point of the pipeline.
@@ -800,7 +800,7 @@ interface HTMLCanvasElement {
   
   interface GPUExternalTextureBindingLayout {}
   
-  interface GPUExternalTextureDescriptor
+  export interface GPUExternalTextureDescriptor
     extends GPUObjectDescriptorBase {
     source:
       | HTMLVideoElement
@@ -999,7 +999,7 @@ interface HTMLCanvasElement {
     reason: GPUPipelineErrorReason;
   }
   
-  interface GPUPipelineLayoutDescriptor
+  export interface GPUPipelineLayoutDescriptor
     extends GPUObjectDescriptorBase {
     /**
      * A list of {@link GPUBindGroupLayout}s the pipeline will use. Each element corresponds to a
@@ -1073,7 +1073,7 @@ interface HTMLCanvasElement {
     >;
   }
   
-  interface GPUQuerySetDescriptor
+  export interface GPUQuerySetDescriptor
     extends GPUObjectDescriptorBase {
     /**
      * The type of queries managed by {@link GPUQuerySet}.
@@ -1090,7 +1090,7 @@ interface HTMLCanvasElement {
   type GPURenderBundleDescriptor =
     GPUObjectDescriptorBase;
   
-  interface GPURenderBundleEncoderDescriptor
+  export interface GPURenderBundleEncoderDescriptor
     extends GPURenderPassLayout {
     /**
      * If `true`, indicates that the render bundle does not modify the depth component of the
@@ -1261,7 +1261,7 @@ interface HTMLCanvasElement {
     endOfPassWriteIndex?: GPUSize32;
   }
   
-  interface GPURenderPipelineDescriptor
+  export interface GPURenderPipelineDescriptor
     extends GPUPipelineDescriptorBase {
     /**
      * Describes the vertex shader entry point of the pipeline and its input buffer layouts.
@@ -1389,7 +1389,7 @@ interface HTMLCanvasElement {
       | GPUAutoLayoutMode;
   }
   
-  interface GPUShaderModuleDescriptor
+  export interface GPUShaderModuleDescriptor
     extends GPUObjectDescriptorBase {
     /**
      * The <a href="https://gpuweb.github.io/gpuweb/wgsl/">WGSL</a> source code for the shader
@@ -1912,7 +1912,7 @@ interface HTMLCanvasElement {
     prototype: GPUAdapterInfo;
   };
   
-  interface GPUBindGroup
+  export interface GPUBindGroup
     extends GPUObjectBase {
     /**
      * Nominal type branding.
@@ -1927,7 +1927,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPUBindGroupLayout
+  export interface GPUBindGroupLayout
     extends GPUObjectBase {
     /**
      * Nominal type branding.
@@ -2057,7 +2057,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPUCommandEncoder
+  export interface GPUCommandEncoder
     extends GPUObjectBase,
       GPUCommandsMixin,
       GPUDebugCommandsMixin {
@@ -2320,7 +2320,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPUComputePipeline
+  export interface GPUComputePipeline
     extends GPUObjectBase,
       GPUPipelineBase {
     /**
@@ -2515,7 +2515,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPUDeviceLostInfo {
+  export interface GPUDeviceLostInfo {
     /**
      * Nominal type branding.
      * https://github.com/microsoft/TypeScript/pull/33038
@@ -2531,7 +2531,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPUError {
+  export interface GPUError {
     /**
      * A human-readable, localizable text message providing information about the error that
      * occurred.
@@ -2633,7 +2633,7 @@ interface HTMLCanvasElement {
     ): GPUPipelineError;
   };
   
-  interface GPUPipelineLayout
+  export interface GPUPipelineLayout
     extends GPUObjectBase {
     /**
      * Nominal type branding.
@@ -2648,7 +2648,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPUQuerySet
+  export interface GPUQuerySet
     extends GPUObjectBase {
     /**
      * Nominal type branding.
@@ -2774,7 +2774,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPURenderBundleEncoder
+  export interface GPURenderBundleEncoder
     extends GPUObjectBase,
       GPUCommandsMixin,
       GPUDebugCommandsMixin,
@@ -2895,7 +2895,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPURenderPipeline
+  export interface GPURenderPipeline
     extends GPUObjectBase,
       GPUPipelineBase {
     /**
@@ -2926,7 +2926,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPUShaderModule
+  export interface GPUShaderModule
     extends GPUObjectBase {
     /**
      * Nominal type branding.
@@ -3068,7 +3068,7 @@ interface HTMLCanvasElement {
     new (): never;
   };
   
-  interface GPUUncapturedErrorEvent
+  export interface GPUUncapturedErrorEvent
     extends Event {
     /**
      * Nominal type branding.
@@ -3117,7 +3117,7 @@ interface HTMLCanvasElement {
   export interface WorkerNavigator
     extends NavigatorGPU {}
   
-     interface GPUBufferUsage {
+  export interface GPUBufferUsage {
     /**
      * Nominal type branding.
      * https://github.com/microsoft/TypeScript/pull/33038

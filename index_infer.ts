@@ -1,7 +1,10 @@
 import { globalAgent } from 'http';
-import { NavigatorGPU,GPUAdapter,GPUQueue ,GPUSupportedLimits,
-    GPUTextureDescriptor,GPUSupportedFeatures,GPURequestAdapterOptions, 
-    GPUBufferUsageFlags, GPUBufferDescriptor, GPU, GPUSampler, GPUSamplerDescriptor,
+import { NavigatorGPU,GPUAdapter,GPUQueue ,GPUSupportedLimits, GPURenderPipeline,GPURenderBundleEncoderDescriptor, GPURenderBundleEncoder,
+    GPUTextureDescriptor,GPUSupportedFeatures,GPURequestAdapterOptions, GPURenderPipelineDescriptor, GPUDeviceLostInfo, GPUSize64,
+    GPUBufferUsageFlags, GPUBufferDescriptor, GPU, GPUSampler, GPUSamplerDescriptor, GPUExternalTexture,GPUQuerySetDescriptor, GPUQuerySet,
+    GPUExternalTextureDescriptor, GPUBindGroupLayoutDescriptor, GPUBindGroupLayout,GPUPipelineLayout, GPUPipelineLayoutDescriptor,
+    GPUBindGroup,GPUBindGroupDescriptor, GPUShaderModuleDescriptor, GPUShaderModule, GPUComputePipelineDescriptor, GPUComputePipeline,
+    GPUCommandEncoder,GPUCommandEncoderDescriptor,GPUErrorFilter,GPUError,GPUUncapturedErrorEvent,
     GPUDevice,GPUTexture ,GPUBuffer } from './gputypes';
 import * as fs from 'fs';
 
@@ -100,6 +103,11 @@ class LocalContext {
 class MyGPUDevice implements GPUDevice {
     // ... other properties and methods ...
 
+    globalCtx?: GlobalContext;
+    localCtx?: LocalContext;
+
+    
+
     descriptor: GPUBufferDescriptor;
     options: GPURequestAdapterOptions | undefined;
     id: number;
@@ -109,6 +117,11 @@ class MyGPUDevice implements GPUDevice {
     features: any;
     limits: any;
     queue: any;
+    label: string;
+    addEventListener: any ;
+    dispatchEvent: any ;
+    removeEventListener : any;
+
 
     constructor() {
         this.randVar = Math.floor(Math.random() * 1000) + 1;
@@ -133,13 +146,74 @@ class MyGPUDevice implements GPUDevice {
         ];
     }
 
+    setContexts(globalCtx: GlobalContext, localCtx: LocalContext): void {
+        //// console.log('Setting contexts:', globalCtx, localCtx);
+        this.globalCtx = globalCtx;
+        this.localCtx = localCtx;
+    }
+
+
     createBuffer(descriptor: GPUBufferDescriptor): GPUBuffer {
-        // For this example, let's return a dummy GPUBuffer object with a reference to the descriptor.
-        // You can expand upon this to better suit your needs.
-      
-            return <GPUBuffer>{}; 
-            // ... other necessary properties and methods to match the GPUBuffer type ...
+        if (!this.globalCtx || !this.localCtx) {
+            throw new Error('GlobalContext and LocalContext must be set before calling createBuffer.');
+        } else {
+            descriptor = this.randomizeDescriptor();
+            
+            if (Array.isArray(this.localCtx.device) && this.localCtx.device.length > 0) {
+                const randomIndex = Math.floor(Math.random() * this.localCtx.device.length);
+                const deviceVar = this.localCtx.device[randomIndex];
+                const bufferVarName = `buffer${this.id}`;
+                
+                // Use globalCtx and localCtx as needed
+                this.globalCtx.addGpuBuffer(bufferVarName);
+                this.localCtx.setGpuBuffers(bufferVarName);
+                
+                // Generate the code snippet
+                const codeSnippet = `const ${bufferVarName} = ${deviceVar}.createBuffer(${JSON.stringify(descriptor)});`;
+                console.log(codeSnippet);
+                this.globalCtx.addGeneratedCode(codeSnippet);
+                
+                // Return a dummy GPUBuffer object
+                return <GPUBuffer>{};
+
+            } else {
+                throw new Error('No devices found in the local context.');
+            }
+        }
+    }
         
+        
+    
+
+    private randomizeDescriptor(): GPUBufferDescriptor {
+        const usageFlags = [
+            GPUBufferUsage.MAP_READ,
+            GPUBufferUsage.MAP_WRITE,
+            GPUBufferUsage.COPY_SRC,
+            GPUBufferUsage.COPY_DST,
+            GPUBufferUsage.INDEX,
+            GPUBufferUsage.VERTEX,
+            GPUBufferUsage.UNIFORM,
+            GPUBufferUsage.STORAGE,
+            GPUBufferUsage.INDIRECT,
+            GPUBufferUsage.QUERY_RESOLVE,
+        ];
+        const size = Math.floor(Math.random() * 1000) + 1;
+        let usage = usageFlags[Math.floor(Math.random() * usageFlags.length)];
+        
+        if (usage & GPUBufferUsage.MAP_READ) {
+            usage = GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST;
+        }
+        if (usage & GPUBufferUsage.MAP_WRITE) {
+            usage = GPUBufferUsage.MAP_WRITE | GPUBufferUsage.COPY_SRC;
+        }
+
+        const mappedAtCreation = Math.random() < 0.5;
+        return {
+            mappedAtCreation: mappedAtCreation,
+            size: mappedAtCreation ? size - (size % 4) + 4 : size, // Ensure size is multiple of 4
+            usage: usage,
+        };
     }
 
     destroy(): undefined {
@@ -172,67 +246,138 @@ class MyGPUDevice implements GPUDevice {
     
     createBindGroupLayout(
       descriptor: GPUBindGroupLayoutDescriptor
-    ): GPUBindGroupLayout;
+    ): GPUBindGroupLayout {
+        return <GPUBindGroupLayout>{};
+    }
    
     
     createPipelineLayout(
       descriptor: GPUPipelineLayoutDescriptor
-    ): GPUPipelineLayout;
+    ): GPUPipelineLayout {
+        return <GPUPipelineLayout>{};
+    }
     
     
     createBindGroup(
       descriptor: GPUBindGroupDescriptor
-    ): GPUBindGroup;
+    ): GPUBindGroup {
+        return <GPUBindGroup>{};
+    }
    
     
     createShaderModule(
       descriptor: GPUShaderModuleDescriptor
-    ): GPUShaderModule;
+    ): GPUShaderModule {
+        return <GPUShaderModule>{};
+    }
     
     
     createComputePipeline(
       descriptor: GPUComputePipelineDescriptor
-    ): GPUComputePipeline;
+    ): GPUComputePipeline {
+        return <GPUComputePipeline>{};
+    }
     
     
     createRenderPipeline(
       descriptor: GPURenderPipelineDescriptor
-    ): GPURenderPipeline;
+    ): GPURenderPipeline {
+        return <GPURenderPipeline>{};
+    }
    
     
     createComputePipelineAsync(
       descriptor: GPUComputePipelineDescriptor
-    ): Promise<GPUComputePipeline>;
+    ): Promise<GPUComputePipeline> {
+            return Promise.resolve(<GPUComputePipeline>{});
+
+    }
     
     
     createRenderPipelineAsync(
       descriptor: GPURenderPipelineDescriptor
-    ): Promise<GPURenderPipeline>;
+    ): Promise<GPURenderPipeline> {
+        return Promise.resolve(<GPURenderPipeline>{});
+
+    }
     
     
     createCommandEncoder(
       descriptor?: GPUCommandEncoderDescriptor
-    ): GPUCommandEncoder;
+    ): GPUCommandEncoder {
+        return <GPUCommandEncoder>{};
+    }
 
     
     createRenderBundleEncoder(
       descriptor: GPURenderBundleEncoderDescriptor
-    ): GPURenderBundleEncoder;
+    ): GPURenderBundleEncoder {
+        return <GPURenderBundleEncoder>{};
+    }
 
     createQuerySet(
       descriptor: GPUQuerySetDescriptor
-    ): GPUQuerySet;
+    ): GPUQuerySet {
+        return <GPUQuerySet>{};
+    }
 
     readonly lost: Promise<GPUDeviceLostInfo>;
 
     pushErrorScope(
       filter: GPUErrorFilter
-    ): undefined;
+    ): undefined {
+        return undefined;
+    }
 
-    popErrorScope(): Promise<GPUError | null>;
+    popErrorScope(): Promise<GPUError | null> {
+        return  Promise.resolve(<GPUError>{});
+
+    }
+
+    onuncapturederror:
+      | ((
+          this: GPUDevice,
+          ev: GPUUncapturedErrorEvent
+        ) => any)
+      | null;
 
 
     generateBufferCode(globalCtx: GlobalContext, localCtx: LocalContext): void { 
+
+        const usageFlags = [
+            GPUBufferUsage.MAP_READ,
+            GPUBufferUsage.MAP_WRITE,
+            GPUBufferUsage.COPY_SRC,
+            GPUBufferUsage.COPY_DST,
+            GPUBufferUsage.INDEX,
+            GPUBufferUsage.VERTEX,
+            GPUBufferUsage.UNIFORM,
+            GPUBufferUsage.STORAGE,
+            GPUBufferUsage.INDIRECT,
+            GPUBufferUsage.QUERY_RESOLVE,
+        ];
+
+        const size = Math.floor(Math.random() * 1000) + 1;
+
+
+        let usage = usageFlags[Math.floor(Math.random() * usageFlags.length)];
+        
+        // Ensure MAP_READ and MAP_WRITE conditions
+        if (usage & GPUBufferUsage.MAP_READ) {
+            usage = GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST;
+        }
+        if (usage & GPUBufferUsage.MAP_WRITE) {
+            usage = GPUBufferUsage.MAP_WRITE | GPUBufferUsage.COPY_SRC;
+        }
+
+        // Randomize mappedAtCreation
+        const mappedAtCreation = Math.random() < 0.5;
+
+        this.descriptor = {
+            mappedAtCreation: mappedAtCreation,
+            size: mappedAtCreation ? size - (size % 4) + 4 : size, // Ensure size is multiple of 4
+            usage: usage,
+        };
 
         if (Array.isArray(localCtx.device) && localCtx.device.length > 0) {
             const randomIndex = Math.floor(Math.random() * localCtx.device.length);
@@ -633,6 +778,31 @@ class GPUDeviceValue extends Value {
         uintArraySample.generate(globalCtx, localCtx);
     }
 
+
+
+
+    console.log("Create the right one :");
+
+    const mygpudev = new MyGPUDevice();
+    mygpudev.setContexts(globalCtx, localCtx);
+
+    
+    
+
+
+
+    const sizex = Math.floor(Math.random() * 1000) + 1;
+    let usagex = GPUBufferUsage.MAP_READ;
+    const mappedAtCreationx = Math.random() < 0.5;
+
+    const desc: GPUBufferDescriptor = {
+        mappedAtCreation: mappedAtCreationx, // corrected name
+        size: sizex,                         // corrected name
+        usage: usagex                        // corrected name
+    };
+
+    mygpudev.createBuffer(desc);
+    
     
     
     // Create a GPUDeviceValue instance to generate a device

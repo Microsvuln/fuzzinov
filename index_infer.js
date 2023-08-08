@@ -112,13 +112,144 @@ var MyGPUDevice = /** @class */ (function () {
             GPUBufferUsage.QUERY_RESOLVE,
         ];
     }
+    MyGPUDevice.prototype.setContexts = function (globalCtx, localCtx) {
+        //// console.log('Setting contexts:', globalCtx, localCtx);
+        this.globalCtx = globalCtx;
+        this.localCtx = localCtx;
+    };
     MyGPUDevice.prototype.createBuffer = function (descriptor) {
-        // For this example, let's return a dummy GPUBuffer object with a reference to the descriptor.
-        // You can expand upon this to better suit your needs.
+        if (!this.globalCtx || !this.localCtx) {
+            throw new Error('GlobalContext and LocalContext must be set before calling createBuffer.');
+        }
+        else {
+            descriptor = this.randomizeDescriptor();
+            if (Array.isArray(this.localCtx.device) && this.localCtx.device.length > 0) {
+                var randomIndex = Math.floor(Math.random() * this.localCtx.device.length);
+                var deviceVar = this.localCtx.device[randomIndex];
+                var bufferVarName = "buffer".concat(this.id);
+                // Use globalCtx and localCtx as needed
+                this.globalCtx.addGpuBuffer(bufferVarName);
+                this.localCtx.setGpuBuffers(bufferVarName);
+                // Generate the code snippet
+                var codeSnippet = "const ".concat(bufferVarName, " = ").concat(deviceVar, ".createBuffer(").concat(JSON.stringify(descriptor), ");");
+                console.log(codeSnippet);
+                this.globalCtx.addGeneratedCode(codeSnippet);
+                // Return a dummy GPUBuffer object
+                return {};
+            }
+            else {
+                throw new Error('No devices found in the local context.');
+            }
+        }
+    };
+    MyGPUDevice.prototype.randomizeDescriptor = function () {
+        var usageFlags = [
+            GPUBufferUsage.MAP_READ,
+            GPUBufferUsage.MAP_WRITE,
+            GPUBufferUsage.COPY_SRC,
+            GPUBufferUsage.COPY_DST,
+            GPUBufferUsage.INDEX,
+            GPUBufferUsage.VERTEX,
+            GPUBufferUsage.UNIFORM,
+            GPUBufferUsage.STORAGE,
+            GPUBufferUsage.INDIRECT,
+            GPUBufferUsage.QUERY_RESOLVE,
+        ];
+        var size = Math.floor(Math.random() * 1000) + 1;
+        var usage = usageFlags[Math.floor(Math.random() * usageFlags.length)];
+        if (usage & GPUBufferUsage.MAP_READ) {
+            usage = GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST;
+        }
+        if (usage & GPUBufferUsage.MAP_WRITE) {
+            usage = GPUBufferUsage.MAP_WRITE | GPUBufferUsage.COPY_SRC;
+        }
+        var mappedAtCreation = Math.random() < 0.5;
+        return {
+            mappedAtCreation: mappedAtCreation,
+            size: mappedAtCreation ? size - (size % 4) + 4 : size,
+            usage: usage,
+        };
+    };
+    MyGPUDevice.prototype.destroy = function () {
+        return undefined;
+    };
+    MyGPUDevice.prototype.createTexture = function (descriptor) {
         return {};
-        // ... other necessary properties and methods to match the GPUBuffer type ...
+    };
+    MyGPUDevice.prototype.createSampler = function (descriptor) {
+        return {};
+    };
+    MyGPUDevice.prototype.importExternalTexture = function (descriptor) {
+        return {};
+    };
+    MyGPUDevice.prototype.createBindGroupLayout = function (descriptor) {
+        return {};
+    };
+    MyGPUDevice.prototype.createPipelineLayout = function (descriptor) {
+        return {};
+    };
+    MyGPUDevice.prototype.createBindGroup = function (descriptor) {
+        return {};
+    };
+    MyGPUDevice.prototype.createShaderModule = function (descriptor) {
+        return {};
+    };
+    MyGPUDevice.prototype.createComputePipeline = function (descriptor) {
+        return {};
+    };
+    MyGPUDevice.prototype.createRenderPipeline = function (descriptor) {
+        return {};
+    };
+    MyGPUDevice.prototype.createComputePipelineAsync = function (descriptor) {
+        return Promise.resolve({});
+    };
+    MyGPUDevice.prototype.createRenderPipelineAsync = function (descriptor) {
+        return Promise.resolve({});
+    };
+    MyGPUDevice.prototype.createCommandEncoder = function (descriptor) {
+        return {};
+    };
+    MyGPUDevice.prototype.createRenderBundleEncoder = function (descriptor) {
+        return {};
+    };
+    MyGPUDevice.prototype.createQuerySet = function (descriptor) {
+        return {};
+    };
+    MyGPUDevice.prototype.pushErrorScope = function (filter) {
+        return undefined;
+    };
+    MyGPUDevice.prototype.popErrorScope = function () {
+        return Promise.resolve({});
     };
     MyGPUDevice.prototype.generateBufferCode = function (globalCtx, localCtx) {
+        var usageFlags = [
+            GPUBufferUsage.MAP_READ,
+            GPUBufferUsage.MAP_WRITE,
+            GPUBufferUsage.COPY_SRC,
+            GPUBufferUsage.COPY_DST,
+            GPUBufferUsage.INDEX,
+            GPUBufferUsage.VERTEX,
+            GPUBufferUsage.UNIFORM,
+            GPUBufferUsage.STORAGE,
+            GPUBufferUsage.INDIRECT,
+            GPUBufferUsage.QUERY_RESOLVE,
+        ];
+        var size = Math.floor(Math.random() * 1000) + 1;
+        var usage = usageFlags[Math.floor(Math.random() * usageFlags.length)];
+        // Ensure MAP_READ and MAP_WRITE conditions
+        if (usage & GPUBufferUsage.MAP_READ) {
+            usage = GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST;
+        }
+        if (usage & GPUBufferUsage.MAP_WRITE) {
+            usage = GPUBufferUsage.MAP_WRITE | GPUBufferUsage.COPY_SRC;
+        }
+        // Randomize mappedAtCreation
+        var mappedAtCreation = Math.random() < 0.5;
+        this.descriptor = {
+            mappedAtCreation: mappedAtCreation,
+            size: mappedAtCreation ? size - (size % 4) + 4 : size,
+            usage: usage,
+        };
         if (Array.isArray(localCtx.device) && localCtx.device.length > 0) {
             var randomIndex = Math.floor(Math.random() * localCtx.device.length);
             var deviceVar = localCtx.device[randomIndex];
@@ -434,6 +565,18 @@ for (var i = 0; i < 2; i++) {
     var uintArraySample = new setUintArray();
     uintArraySample.generate(globalCtx, localCtx);
 }
+console.log("Create the right one :");
+var mygpudev = new MyGPUDevice();
+mygpudev.setContexts(globalCtx, localCtx);
+var sizex = Math.floor(Math.random() * 1000) + 1;
+var usagex = GPUBufferUsage.MAP_READ;
+var mappedAtCreationx = Math.random() < 0.5;
+var desc = {
+    mappedAtCreation: mappedAtCreationx,
+    size: sizex,
+    usage: usagex // corrected name
+};
+mygpudev.createBuffer(desc);
 // Create a GPUDeviceValue instance to generate a device
 // Execute the generated code, assuming you have logic in the generate method to actually request an adapter
 // ...
