@@ -324,22 +324,25 @@ class GPUBuffeMappedRange extends Value {
 class setUintArray extends Value {
     id : number;
     randVar : number;
-    length : Array<number> = [8,16,32,64,128];
+    lengthOptions: Array<number> = [8, 16, 32, 64, 128];
+    selectedLength: number;
     static idCounter = 0;
     
     constructor(){
         super();
         this.randVar = Math.floor(Math.random() * 1000) + 1;
         this.id = this.randVar;
+        this.selectedLength = this.lengthOptions[Math.floor(Math.random() * this.lengthOptions.length)];
     }
 
     generate(globalCtx: GlobalContext, localCtx: LocalContext): void {
         if (Array.isArray(localCtx.arrayBuffer) && localCtx.arrayBuffer.length > 0) {            
             const randomIndexArrayBuffer = Math.floor(Math.random() * localCtx.arrayBuffer.length);
             const randomArrayBuffer = localCtx.arrayBuffer[randomIndexArrayBuffer];
-
-            const codeSnippet = `const UintArray${this.id}= new Uint8Array(${randomArrayBuffer}).set([0, 1, 2, 3]);`;
-            const uIntArray = `UintArray${this.id}`;
+            console.log('Length for array is : ', this.selectedLength);
+            
+            const codeSnippet = `const Uint${this.selectedLength}Array${this.id} = new Uint${this.selectedLength}Array(${randomArrayBuffer}).set([0, 1, 2, 3]);`;
+            const uIntArray = `Uint${this.selectedLength}Array${this.id}`;
             globalCtx.addUintArray(uIntArray);
             //// const code = `const adapter${this.id} = await gpu.requestAdapter(${this.options ? JSON.stringify(this.options) : ''});\n`;
             //// globalCtx.addArrayBuffer(arrayBuffer);

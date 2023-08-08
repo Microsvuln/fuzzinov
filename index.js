@@ -280,17 +280,19 @@ var setUintArray = /** @class */ (function (_super) {
     __extends(setUintArray, _super);
     function setUintArray() {
         var _this = _super.call(this) || this;
-        _this.length = [8, 16, 32, 64, 128];
+        _this.lengthOptions = [8, 16, 32, 64, 128];
         _this.randVar = Math.floor(Math.random() * 1000) + 1;
         _this.id = _this.randVar;
+        _this.selectedLength = _this.lengthOptions[Math.floor(Math.random() * _this.lengthOptions.length)];
         return _this;
     }
     setUintArray.prototype.generate = function (globalCtx, localCtx) {
         if (Array.isArray(localCtx.arrayBuffer) && localCtx.arrayBuffer.length > 0) {
             var randomIndexArrayBuffer = Math.floor(Math.random() * localCtx.arrayBuffer.length);
             var randomArrayBuffer = localCtx.arrayBuffer[randomIndexArrayBuffer];
-            var codeSnippet = "const UintArray".concat(this.id, "= new Uint8Array(").concat(randomArrayBuffer, ").set([0, 1, 2, 3]);");
-            var uIntArray = "UintArray".concat(this.id);
+            console.log('Length for array is : ', this.selectedLength);
+            var codeSnippet = "const Uint".concat(this.selectedLength, "Array").concat(this.id, " = new Uint").concat(this.selectedLength, "Array(").concat(randomArrayBuffer, ").set([0, 1, 2, 3]);");
+            var uIntArray = "Uint".concat(this.selectedLength, "Array").concat(this.id);
             globalCtx.addUintArray(uIntArray);
             //// const code = `const adapter${this.id} = await gpu.requestAdapter(${this.options ? JSON.stringify(this.options) : ''});\n`;
             //// globalCtx.addArrayBuffer(arrayBuffer);
