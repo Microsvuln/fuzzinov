@@ -74,7 +74,7 @@ interface HTMLCanvasElement {
   
       | Iterable<GPUIntegerCoordinate>
       | GPUExtent3DDict;
-  type GPUFlagsConstant =
+  export type GPUFlagsConstant =
     number;
   type GPUImageCopyExternalImageSource =
   
@@ -89,7 +89,7 @@ interface HTMLCanvasElement {
     number;
   type GPUIntegerCoordinateOut =
     number;
-  type GPUMapModeFlags =
+  export type GPUMapModeFlags =
     number;
   type GPUOrigin2D =
   
@@ -113,7 +113,7 @@ interface HTMLCanvasElement {
     number;
   export type GPUSize64 =
     number;
-  type GPUSize64Out =
+  export type GPUSize64Out =
     number;
   type GPUStencilValue =
     number;
@@ -3045,7 +3045,7 @@ interface HTMLCanvasElement {
     /**
      * The allowed usages for this {@link GPUTexture}.
      */
-    readonly usage: GPUFlagsConstant;
+     readonly usage: GPUFlagsConstant;
   }
   
   declare var GPUTexture: {

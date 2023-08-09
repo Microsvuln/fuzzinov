@@ -43,6 +43,7 @@ var GlobalContext = /** @class */ (function () {
         this.arrayBuffers = [];
         this.generatedCodeSnippets = [];
         this.UintArrays = [];
+        this.encoderVars = [];
     }
     // Method to add an adapter
     GlobalContext.prototype.addAdapter = function (adapter) {
@@ -56,6 +57,9 @@ var GlobalContext = /** @class */ (function () {
     };
     GlobalContext.prototype.addGpuBuffer = function (gpuBuffer) {
         this.gpuBuffers.push(gpuBuffer);
+    };
+    GlobalContext.prototype.addEncoder = function (encoderVar) {
+        this.encoderVars.push(encoderVar);
     };
     GlobalContext.prototype.addGeneratedCode = function (snippet) {
         this.generatedCodeSnippets.push(snippet);
@@ -71,6 +75,7 @@ var LocalContext = /** @class */ (function () {
         this.device = null; // Define as an array of strings or null
         this.gpuBuffer = null;
         this.arrayBuffer = null;
+        this.encoderVar = null;
     }
     LocalContext.prototype.setDevice = function (device) {
         if (this.device === null) {
@@ -90,7 +95,70 @@ var LocalContext = /** @class */ (function () {
         }
         this.arrayBuffer.push(arrayBuffer);
     };
+    LocalContext.prototype.setEncoders = function (encoderVar) {
+        if (this.encoderVar == null) {
+            this.encoderVar = [];
+        }
+        this.encoderVar.push(encoderVar);
+    };
     return LocalContext;
+}());
+var MyGPUBuffer = /** @class */ (function () {
+    function MyGPUBuffer() {
+        this.randVar = Math.floor(Math.random() * 1000) + 1;
+        this.id = this.randVar;
+    }
+    MyGPUBuffer.prototype.setContexts = function (globalCtx, localCtx) {
+        //// console.log('Setting contexts:', globalCtx, localCtx);
+        this.globalCtx = globalCtx;
+        this.localCtx = localCtx;
+    };
+    MyGPUBuffer.prototype.mapAsync = function (mode, offset, size) {
+        return Promise.resolve(undefined);
+    };
+    MyGPUBuffer.prototype.getMappedRange = function (offset, size) {
+        if (!this.globalCtx || !this.localCtx) {
+            throw new Error('GlobalContext and LocalContext must be set before calling generateGetMappedRange.');
+        }
+        if (Array.isArray(this.localCtx.gpuBuffer) && this.localCtx.gpuBuffer.length > 0) {
+            var randomIndexGpuBuffers = Math.floor(Math.random() * this.localCtx.gpuBuffer.length);
+            var bufferVar = this.localCtx.gpuBuffer[randomIndexGpuBuffers];
+            var codeSnippet = "const arrayBuffer".concat(this.id, " = ").concat(bufferVar, ".getMappedRange();");
+            var arrayBuffer = "arrayBuffer".concat(this.id);
+            this.globalCtx.addArrayBuffer(arrayBuffer);
+            this.localCtx.setArrayBuffers(arrayBuffer);
+            this.globalCtx.addGeneratedCode(codeSnippet);
+            console.log(codeSnippet);
+        }
+        else {
+            throw new Error('No gpuBuffer found in the local context.');
+        }
+        return {};
+    };
+    MyGPUBuffer.prototype.unmap = function () {
+        if (!this.globalCtx || !this.localCtx) {
+            throw new Error('GlobalContext and LocalContext must be set before calling generateGetMappedRange.');
+        }
+        if (Array.isArray(this.localCtx.gpuBuffer) && this.localCtx.gpuBuffer.length > 0) {
+            var randomIndexGpuBuffers = Math.floor(Math.random() * this.localCtx.gpuBuffer.length);
+            var bufferVar = this.localCtx.gpuBuffer[randomIndexGpuBuffers];
+            var codeSnippet = "const arrayBuffer".concat(this.id, " = ").concat(bufferVar, ".unmap();");
+            var arrayBuffer = "arrayBuffer".concat(this.id);
+            //// this.globalCtx.addArrayBuffer(arrayBuffer);
+            //// this.localCtx.setArrayBuffers(arrayBuffer);
+            this.globalCtx.addGeneratedCode(codeSnippet);
+            console.log(codeSnippet);
+        }
+        else {
+            throw new Error('No gpuBuffer found in the local context.');
+        }
+        return undefined;
+    };
+    MyGPUBuffer.prototype.destroy = function () {
+        return undefined;
+    };
+    MyGPUBuffer.idCounter = 0;
+    return MyGPUBuffer;
 }());
 var MyGPUDevice = /** @class */ (function () {
     function MyGPUDevice() {
@@ -207,6 +275,28 @@ var MyGPUDevice = /** @class */ (function () {
         return Promise.resolve({});
     };
     MyGPUDevice.prototype.createCommandEncoder = function (descriptor) {
+        if (!this.globalCtx || !this.localCtx) {
+            throw new Error('GlobalContext and LocalContext must be set before calling createBuffer.');
+        }
+        else {
+            //// descriptor = this.randomizeDescriptor();
+            if (Array.isArray(this.localCtx.device) && this.localCtx.device.length > 0) {
+                var randomIndex = Math.floor(Math.random() * this.localCtx.device.length);
+                var deviceVar = this.localCtx.device[randomIndex];
+                var encoderVarName = "cmdEncoder".concat(this.id);
+                // Use globalCtx and localCtx as needed
+                this.globalCtx.addEncoder(encoderVarName);
+                this.localCtx.setEncoders(encoderVarName);
+                // Generate the code snippet
+                var codeSnippet = "const ".concat(encoderVarName, " = ").concat(deviceVar, ".createCommandEncoder();");
+                console.log(codeSnippet);
+                this.globalCtx.addGeneratedCode(codeSnippet);
+                // Return a dummy GPUBuffer object
+            }
+            else {
+                throw new Error('No devices found in the local context.');
+            }
+        }
         return {};
     };
     MyGPUDevice.prototype.createRenderBundleEncoder = function (descriptor) {
@@ -220,50 +310,6 @@ var MyGPUDevice = /** @class */ (function () {
     };
     MyGPUDevice.prototype.popErrorScope = function () {
         return Promise.resolve({});
-    };
-    MyGPUDevice.prototype.generateBufferCode = function (globalCtx, localCtx) {
-        var usageFlags = [
-            GPUBufferUsage.MAP_READ,
-            GPUBufferUsage.MAP_WRITE,
-            GPUBufferUsage.COPY_SRC,
-            GPUBufferUsage.COPY_DST,
-            GPUBufferUsage.INDEX,
-            GPUBufferUsage.VERTEX,
-            GPUBufferUsage.UNIFORM,
-            GPUBufferUsage.STORAGE,
-            GPUBufferUsage.INDIRECT,
-            GPUBufferUsage.QUERY_RESOLVE,
-        ];
-        var size = Math.floor(Math.random() * 1000) + 1;
-        var usage = usageFlags[Math.floor(Math.random() * usageFlags.length)];
-        // Ensure MAP_READ and MAP_WRITE conditions
-        if (usage & GPUBufferUsage.MAP_READ) {
-            usage = GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST;
-        }
-        if (usage & GPUBufferUsage.MAP_WRITE) {
-            usage = GPUBufferUsage.MAP_WRITE | GPUBufferUsage.COPY_SRC;
-        }
-        // Randomize mappedAtCreation
-        var mappedAtCreation = Math.random() < 0.5;
-        this.descriptor = {
-            mappedAtCreation: mappedAtCreation,
-            size: mappedAtCreation ? size - (size % 4) + 4 : size,
-            usage: usage,
-        };
-        if (Array.isArray(localCtx.device) && localCtx.device.length > 0) {
-            var randomIndex = Math.floor(Math.random() * localCtx.device.length);
-            var deviceVar = localCtx.device[randomIndex];
-            // Generate the code snippet
-            var codeSnippet = "const buffer".concat(this.id, " = ").concat(deviceVar, ".createBuffer(").concat(JSON.stringify(this.descriptor), ");");
-            var buffer = "buffer".concat(this.id);
-            globalCtx.addGpuBuffer(buffer);
-            localCtx.setGpuBuffers(buffer);
-            globalCtx.addGeneratedCode(codeSnippet);
-            console.log(codeSnippet);
-        }
-        else {
-            throw new Error('No devices found in the local context.');
-        }
     };
     MyGPUDevice.idCounter = 0;
     return MyGPUDevice;
@@ -577,6 +623,10 @@ var desc = {
     usage: usagex // corrected name
 };
 mygpudev.createBuffer(desc);
+var GPUBUfferClass1 = new MyGPUBuffer();
+GPUBUfferClass1.setContexts(globalCtx, localCtx);
+GPUBUfferClass1.getMappedRange(0, 0);
+mygpudev.createCommandEncoder();
 // Create a GPUDeviceValue instance to generate a device
 // Execute the generated code, assuming you have logic in the generate method to actually request an adapter
 // ...
